@@ -364,6 +364,29 @@
     scroll-margin-top: 100px;
   }
 
+  .scroll-top-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 24px;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: background 0.3s ease, transform 0.2s ease;
+  z-index: 999;
+}
+
+.scroll-top-btn:hover {
+  background-color: rgba(0, 196, 255, 0.15);
+  transform: scale(1.1);
+}
+
   </style>
 </head>
 <body>
@@ -487,7 +510,9 @@
     <p>Email: welleson@devtorquato.com.br</p>
     <p>LinkedIn: https://www.linkedin.com/in/welleson-torquato/</p>
   </section>
-  <button onclick="scrollToSection('inicio')" style="margin-top: 30px;">Voltar ao início</button>
+
+  <!-- BOTÃO VOLTAR AO TOPO -->
+  <button onclick="scrollToSection('inicio')" class="scroll-top-btn">↑</button>
 
   <footer>
     <p>&copy; 2025 Welleson Torquato. Todos os direitos reservados.</p>
