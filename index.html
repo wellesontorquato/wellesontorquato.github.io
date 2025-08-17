@@ -528,6 +528,38 @@
       .timeline-item.left, .timeline-item.right { left: 0%; }
       .timeline-item::after { left: 1px; }
     }
+    /* --- ESTILOS PARA A NOTIFICAÇÃO DO FORMULÁRIO --- */
+    .notification {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 25px;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 600;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease, bottom 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .notification.show {
+      opacity: 1;
+      visibility: visible;
+      bottom: 50px; /* Efeito de subir ao aparecer */
+    }
+
+    /* Cor para sucesso */
+    .notification.success {
+      background-color: #28a745; /* Verde */
+    }
+
+    /* Cor para erro */
+    .notification.error {
+      background-color: #dc3545; /* Vermelho */
+    }
   </style>
 </head>
 <body>
@@ -696,13 +728,17 @@
     <section class="section" id="contato">
       <h2 class="section-title">Vamos Conversar?</h2>
       <p class="section-subtitle">Estou aberto a novas oportunidades e projetos. Envie uma mensagem!</p>
-      <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
-        <input type="hidden" name="access_key" value="3350356a-788b-4467-aa62-a2c40e49bece"> <input type="text" name="name" placeholder="Seu Nome" required>
+      
+      <form id="contactForm" class="contact-form" action="https://api.web3forms.com/submit" method="POST">
+        <input type="hidden" name="access_key" value="3350356a-788b-4467-aa62-a2c40e49bece">
+        <input type="text" name="name" placeholder="Seu Nome" required>
         <input type="email" name="email" placeholder="Seu E-mail" required>
         <textarea name="message" rows="6" placeholder="Sua Mensagem" required></textarea>
         <button type="submit">Enviar Mensagem</button>
       </form>
     </section>
+
+    <div id="form-notification" class="notification"></div>
   </main>
   
   <button class="scroll-top-btn" id="scrollTopBtn" aria-label="Voltar ao topo">
@@ -766,29 +802,96 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
 
+
+      // --- SCRIPT PARA ENVIO DO FORMULÁRIO DE CONTATO VIA AJAX (NOVO) ---
+      const form = document.getElementById('contactForm');
+      const notification = document.getElementById('form-notification');
+
+      if (form) {
+        form.addEventListener('submit', function(event) {
+          event.preventDefault();
+
+          const formData = new FormData(form);
+          const object = {};
+          formData.forEach((value, key) => {
+            object[key] = value;
+          });
+          const json = JSON.stringify(object);
+
+          const submitButton = form.querySelector('button');
+          submitButton.disabled = true;
+          submitButton.textContent = 'Enviando...';
+
+          fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: json
+          })
+          .then(async (response) => {
+            let jsonResponse = await response.json();
+            if (response.status == 200) {
+              showNotification('Mensagem enviada com sucesso!', 'success');
+              form.reset(); 
+            } else {
+              console.log(response);
+              showNotification(jsonResponse.message, 'error');
+            }
+          })
+          .catch(error => {
+            console.log(error);
+            showNotification('Algo deu errado. Tente novamente.', 'error');
+          })
+          .finally(() => {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Enviar Mensagem';
+          });
+        });
+      }
+
+      function showNotification(message, type) {
+        if (notification) {
+          notification.textContent = message;
+          notification.className = 'notification'; 
+          notification.classList.add(type);
+          notification.classList.add('show');
+
+          setTimeout(() => {
+            notification.classList.remove('show');
+          }, 5000);
+        }
+      }
+      // --- FIM DO SCRIPT DO FORMULÁRIO ---
+
+
     }); // Fim do DOMContentLoaded
 
-    // --- MODAL DE IMAGEM (pode ficar fora do DOMContentLoaded) ---
+    
+    // --- MODAL DE IMAGEM (Mantido fora do DOMContentLoaded) ---
     const modal = document.getElementById("modalImg");
     const modalImg = document.getElementById("imgAmpliada");
     const modalCloseBtn = document.getElementById("modalCloseBtn");
     
     function expandImage(src) {
-      modal.style.display = "block";
-      modalImg.src = src;
+      if (modal) modal.style.display = "block";
+      if (modalImg) modalImg.src = src;
     }
 
     function closeModal() {
-      modal.style.display = "none";
+      if (modal) modal.style.display = "none";
     }
 
-    modalCloseBtn.onclick = closeModal;
-    modal.onclick = function(event) {
-      if (event.target === modal) {
-        closeModal();
+    if (modalCloseBtn) modalCloseBtn.onclick = closeModal;
+    if (modal) {
+      modal.onclick = function(event) {
+        if (event.target === modal) {
+          closeModal();
+        }
       }
     }
-  </script>
 
+  </script>
 </body>
 </html>
